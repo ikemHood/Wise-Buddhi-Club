@@ -1,0 +1,142 @@
+
+# WiseBuddhiClub - Korea
+
+이 스마트 컨트랙트는 OG와 WL과 같은 다른 접근 수준을 가진 ERC-1155 NFT를 발행합니다.
+
+## 컨트랙트 변수
+
+- `_name` - NFT 컬렉션의 이름
+- `_symbol` - NFT 컬렉션의 상징
+- `_totalSupply` - 발행된 NFT의 총 수량
+- `WBC_OG` - OG NFT의 토큰 ID
+- `WBC_WL` - WL NFT의 토큰 ID
+- `uriPrefix` - 토큰 URI의 기본 URI
+- `uriSuffix` - 토큰 URI에 추가할 접미사
+- `hiddenMetadataUri` - 공개 전 사용할 URI
+- `OGPrice` - OG NFT 발행 가격
+- `WLPrice` - WL NFT 발행 가격
+- `publicPrice` - 일반 발행 가격
+- `maxSupply` - NFT 최대 공급량
+- `OGSupply` - OG NFT 최대 공급량
+- `WLSupply` - WL NFT 최대 공급량  
+- `totalOGMinted` - 발행된 OG NFT 수
+- `totalWLMinted` - 발행된 WL NFT 수
+- `maxMintAmountPerTx` - 트랜잭션 당 최대 NFT 수 
+- `maxMintAmountPerAddress` - 주소 당 최대 NFT 수
+- `mintedAmount` - 주소 당 발행한 NFT 수
+- `revealed` - 메타데이터 공개 여부
+- `pause` - 발행 일시정지 여부
+- `round` - 현재 발행 라운드
+
+## 발행 함수
+
+- `whitelistMint` - WL 라운드에서 WL NFT 발행
+- `OGMint` - OG 라운드에서 OG NFT 발행
+- `mint` - 일반 발행
+
+## 소유자 함수
+
+- `mintOGIdentifier` - OG 패스 발행
+- `mintWLIdentifier` - WL 패스 발행
+- `distributeOGIdentifier` - OG 패스 배포
+- `distributeWLIdentifier` - WL 패스 배포
+- `airdropNFT` - NFT 에어드롭
+- `setRevealed` - 메타데이터 공개
+- `moveRound` - 다음 발행 라운드로 이동
+- `setPaused` - 발행 일시정지/재개
+- `setPublicPrice` - 일반 발행 가격 설정
+- `setOGPrice` - OG 발행 가격 설정
+- `setWLPrice` - WL 발행 가격 설정
+- `setWLSupply` - WL 최대 공급량 설정
+- `setOGSupply` - OG 최대 공급량 설정
+- `setMaxMintAmountPerTx` - 트랜잭션 당 최대 발행량 설정
+- `setMaxMintAmountPerAddress` - 주소 당 최대 발행량 설정
+- `setHiddenMetadataUri` - 숨겨진 메타데이터 URI 설정
+- `setURI` - 기본 URI 설정
+- `setUriPrefix` - URI 접두사 설정
+- `setUriSuffix` - URI 접미사 설정
+- `withdraw` - 자금 인출
+
+## 조회 함수
+
+- `name` - 이름 조회
+- `symbol` - 상징 조회 
+- `totalSupply` - 총 공급량 조회
+- `getRoundStatus` - 현재 라운드 조회
+- `tokenURI` - 토큰 URI 조회
+- `isUserOG` - 사용자가 OG NFT 보유 여부 확인
+- `isUserWL` - 사용자가 WL NFT 보유 여부 확인
+- `getOGBalance` - 사용자 OG 보유 수량 조회
+- `getWLBalance` - 사용자 WL 보유 수량 조회
+
+
+
+# WiseBuddhiClub - En
+
+This is an ERC-1155 NFT contract that mints NFTs with different access levels - OG and WL. 
+
+## Contract Variables
+
+- `_name` - Name of the NFT collection
+- `_symbol` - Symbol of the NFT collection 
+- `_totalSupply` - Total supply of NFTs minted
+- `WBC_OG` - Token ID for OG NFTs 
+- `WBC_WL` - Token ID for WL NFTs
+- `uriPrefix` - Base URI for token URIs
+- `uriSuffix` - Suffix to add to token URIs 
+- `hiddenMetadataUri` - URI to use before reveal
+- `OGPrice` - Mint price for OG NFTs
+- `WLPrice` - Mint price for WL NFTs  
+- `publicPrice` - Mint price for public sale
+- `maxSupply` - Max supply of NFTs
+- `OGSupply` - Max supply of OG NFTs
+- `WLSupply` - Max supply of WL NFTs
+- `totalOGMinted` - Total OG NFTs minted
+- `totalWLMinted` - Total WL NFTs minted
+- `maxMintAmountPerTx` - Max NFTs per transaction
+- `maxMintAmountPerAddress` - Max NFTs per address
+- `mintedAmount` - Number of NFTs minted per address
+- `revealed` - Whether metadata is revealed
+- `pause` - Whether minting is paused
+- `round` - Current minting round 
+
+## Minting Functions
+
+- `whitelistMint` - Mint WL NFTs during WL round
+- `OGMint` - Mint OG NFTs during OG round
+- `mint` - Public mint
+
+## Owner Functions 
+
+- `mintOGIdentifier` - Mint OG passes
+- `mintWLIdentifier` - Mint WL passes
+- `distributeOGIdentifier` - Distribute OG passes
+- `distributeWLIdentifier` - Distribute WL passes  
+- `airdropNFT` - Airdrop NFTs
+- `setRevealed` - Reveal metadata
+- `moveRound` - Move to next minting round
+- `setPaused` - Pause/unpause minting
+- `setPublicPrice` - Set public mint price
+- `setOGPrice` - Set OG mint price
+- `setWLPrice` - Set WL mint price
+- `setWLSupply` - Set max WL supply
+- `setOGSupply` - Set max OG supply
+- `setMaxMintAmountPerTx` - Set max mint per TX
+- `setMaxMintAmountPerAddress` - Set max mint per address
+- `setHiddenMetadataUri` - Set hidden metadata URI
+- `setURI` - Set base URI
+- `setUriPrefix` - Set URI prefix
+- `setUriSuffix` - Set URI suffix
+- `withdraw` - Withdraw funds
+
+## View Functions
+
+- `name` - Get name
+- `symbol` - Get symbol
+- `totalSupply` - Get total supply  
+- `getRoundStatus` - Get current round
+- `tokenURI` - Get token URI
+- `isUserOG` - Check if user has OG NFT
+- `isUserWL` - Check if user has WL NFT
+- `getOGBalance` - Get user's OG balance
+- `getWLBalance` - Get user's WL balance

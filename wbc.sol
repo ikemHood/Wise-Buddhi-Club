@@ -44,7 +44,7 @@ contract WiseBuddhiClub is
 
     bool public revealed = false;
     bool public pause = false;
-    uint8 private round; // 1 ~ OG mint, 2 ~ WL mint, 3 ~ public mint
+    uint8 private round = 0; // 1 ~ OG mint, 2 ~ WL mint, 3 ~ public mint
 
     constructor(
         string memory _tokenName,
@@ -227,8 +227,8 @@ contract WiseBuddhiClub is
         _mintNFT(_receiver, _mintAmount);
     }
 
-    function setRevealed(bool _state) public onlyOwner {
-        revealed = _state;
+    function setRevealed() public onlyOwner {
+        revealed = !revealed;
     }
 
     /**
@@ -240,8 +240,8 @@ contract WiseBuddhiClub is
         round++;
     }
 
-    function setPaused(bool _pause) public onlyOwner {
-        pause = _pause;
+    function setPaused() public onlyOwner {
+        pause = !pause;
     }
     
     function setPublicPrice(uint256 price) public onlyOwner {

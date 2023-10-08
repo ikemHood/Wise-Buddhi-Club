@@ -69,6 +69,19 @@
 - `getOGBalance` - 사용자 OG 보유 수량 조회
 - `getWLBalance` - 사용자 WL 보유 수량 조회
 
+웹사이트는 config 폴더 내의 info.json 파일을 사용하여 설정됩니다. 사이트의 컨텐츠를 업데이트하기 위해서는 이 파일만 편집하시면 됩니다. 각 필드는 다음과 같습니다:
+
+"contract_address": 배포된 NFT 스마트 컨트랙트 주소를 입력하세요. "contract_address" 부분은 수정하지 마시고, 주소만 따옴표 안에 붙여넣기 하세요.
+
+"chainId": 블록체인 네트워크를 지정합니다. 1은 이더리움 메인넷을 의미합니다.
+
+"links": 사이트에 표시할 링크를 입력하세요. 각 속성의 따옴표 사이에 URL을 붙여넣기 하시면 됩니다.
+
+"opensea": 오픈시에서 컬렉션 링크
+"twitter": 트위터 페이지 링크
+"discord": 디스코드 초대 링크
+"website": 외부 사이트 링크가 있다면 입력하세요.
+"description": 홈페이지에 표시할 프로젝트 설명을 입력하세요. 따옴표 사이에 텍스트를 작성하거나 붙여넣기 하세요.
 
 
 # WiseBuddhiClub - En
@@ -140,3 +153,21 @@ This is an ERC-1155 NFT contract that mints NFTs with different access levels - 
 - `isUserWL` - Check if user has WL NFT
 - `getOGBalance` - Get user's OG balance
 - `getWLBalance` - Get user's WL balance
+
+The website is configured using the info.json file located in the dist folder. This is the only file you need to edit to update content on the site. Here's what each field represents:
+
+- "contract_address": This is where you'll put the address of the deployed NFT smart contract. Don't change the "contract_address" part, just paste the address inside the quotes.
+
+- "chainId": This specifies the blockchain network. 1 is for Ethereum mainnet. 
+
+- "links": This contains links you want to display on the site. Just paste in the URL between the quotes for each property.
+
+  - "opensea": Link to the collection on OpenSea
+
+  - "twitter": Link to the Twitter page
+
+  - "discord": Invite link for Discord
+
+  - "website": Link to an external site if you have one
+
+- "description": This is where you can put a description of the project that will appear on the home page. Just write or paste text between the quotes. 

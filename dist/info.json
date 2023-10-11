@@ -1,5 +1,5 @@
 {
-    "contract_address": "put cmart contract address here",
+    "contract_address": "",
     "chainId": "1",
     "links": {
         "opensea": "",
@@ -9,4 +9,3 @@
     },
     "description": " lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson lorem ipson"
 }
-

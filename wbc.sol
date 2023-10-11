@@ -4,36 +4,32 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
-contract WiseBuddhiClub is
-    ERC1155,
-    Ownable,
-    ERC1155Supply,
-    ReentrancyGuard
-{
+contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     using Strings for uint256;
 
     string private _name;
     string private _symbol;
-    uint256 private _totalSupply;
-    
+    uint256 private _totalNFTs;
+
     uint256 private constant WBC_OG = 10001;
     uint256 private constant WBC_WL = 10002;
+    mapping(address => uint256) private totalBalances;
 
     string private uriSuffix = ".json";
     string private uriPrefix;
     string private hiddenMetadataUri;
 
     uint256 public OGPrice = 0.001 ether;
-    uint256 public WLPrice = 0.001 ether;
+    uint256 public WhitelistPrice = 0.001 ether;
     uint256 public publicPrice = 0.001 ether;
 
     uint256 public maxSupply = 10000;
 
-    uint256 private OGSupply = 1000;
-    uint256 private WLSupply = 5000;
+    uint256 public OGSupply = 1000;
+    uint256 public WhitelistSupply = 5000;
 
     uint256 private totalOGMinted;
     uint256 private totalWLMinted;
@@ -43,28 +39,37 @@ contract WiseBuddhiClub is
     mapping(address => uint256) private mintedAmount;
 
     bool public revealed = false;
-    bool public pause = false;
+    bool public paused = false;
     uint8 private round = 0; // 1 ~ OG mint, 2 ~ WL mint, 3 ~ public mint
 
     constructor(
         string memory _tokenName,
         string memory _tokenSymbol,
         string memory _hiddenMetadataUri
-    ) ERC1155("") {
+    ) ERC1155("") Ownable(_msgSender()) {
         _name = _tokenName;
         _symbol = _tokenSymbol;
         setHiddenMetadataUri(_hiddenMetadataUri);
 
-        _mint(msg.sender, WBC_OG, OGSupply, "");
-        _mint(msg.sender, WBC_WL, WLSupply, "");
+        _mint(owner(), WBC_OG, OGSupply, "");
+        _mint(owner(), WBC_WL, WhitelistSupply, "");
     }
 
     /** Modifiers **/
-    modifier mintCompliance(uint256 _mintAmount) {
-        require(!pause, "Contract Is Paused");
-        require( _mintAmount > 0 && _mintAmount <= maxMintAmountPerTx, "Invalid mint amount!" );
-        require( mintedAmount[msg.sender] + _mintAmount <= maxMintAmountPerAddress, "Exceeds max mint amount" );
-        require( totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded!" );
+    modifier mintCompliance(uint256 _mintAmount, address user) {
+        require(!paused || _msgSender() == owner(), "Contract Is Paused");
+        require(
+            _mintAmount > 0 && _mintAmount <= maxMintAmountPerTx,
+            "Invalid mint amount!"
+        );
+        require(
+            mintedAmount[user] + _mintAmount <= maxMintAmountPerAddress,
+            "Exceeds max mint amount"
+        );
+        require(
+            totalSupply() + _mintAmount <= maxSupply,
+            "Max supply exceeded!"
+        );
         _;
     }
 
@@ -75,16 +80,22 @@ contract WiseBuddhiClub is
     }
 
     modifier OGCompliance(uint256 _mintAmount) {
-        require( totalOGMinted + _mintAmount <= OGSupply, "OG supply exceeded!" );
+        require(totalOGMinted + _mintAmount <= OGSupply, "OG supply exceeded!");
         require(round == 1, "The OG Mint has not started!");
         require(msg.value >= OGPrice * _mintAmount, "Insufficient funds!");
         _;
     }
 
     modifier WLCompliance(uint256 _mintAmount) {
-        require( totalWLMinted + _mintAmount <= WLSupply, "WL supply exceeded!" );
+        require(
+            totalWLMinted + _mintAmount <= WhitelistSupply,
+            "WL supply exceeded!"
+        );
         require(round == 2, "The WL Mint has not started!");
-        require(msg.value >= WLPrice * _mintAmount, "Insufficient funds!");
+        require(
+            msg.value >= WhitelistPrice * _mintAmount,
+            "Insufficient funds!"
+        );
         _;
     }
 
@@ -92,40 +103,43 @@ contract WiseBuddhiClub is
     function whitelistMint(uint256 _mintAmount)
         public
         payable
-        mintCompliance(_mintAmount)
         WLCompliance(_mintAmount)
+        mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
         totalWLMinted += _mintAmount;
 
-        _mintNFT(msg.sender, _mintAmount);
+        _mintNFT(_msgSender(), _mintAmount);
     }
 
     function OGMint(uint256 _mintAmount)
         public
         payable
-        mintCompliance(_mintAmount)
         OGCompliance(_mintAmount)
+        mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
         totalOGMinted += _mintAmount;
 
-        _mintNFT(msg.sender, _mintAmount);
+        _mintNFT(_msgSender(), _mintAmount);
     }
 
-    
     function mint(uint256 _mintAmount)
         public
         payable
-        mintCompliance(_mintAmount)
         publicCompliance(_mintAmount)
+        mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
 
-        _mintNFT(msg.sender, _mintAmount);
+        _mintNFT(_msgSender(), _mintAmount);
     }
 
-    function transferFrom(address from, address to, uint256 id) public {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public {
         super.safeTransferFrom(from, to, id, 1, "");
     }
 
@@ -138,8 +152,18 @@ contract WiseBuddhiClub is
         return _symbol;
     }
 
-    function totalSupply() public view virtual returns (uint256) {
-        return _totalSupply;
+    //returns total NFT supply
+    function totalSupply() public view virtual override returns (uint256) {
+        return _totalNFTs;
+    }
+
+    //returns totalSupply of all tokens including NFT's and FT
+    function totalTokenSupply() public view virtual returns (uint256) {
+        return super.totalSupply();
+    }
+    
+    function balanceOf(address account) public view virtual returns (uint256) {
+        return totalBalances[account];
     }
 
     function getRoundStatus() public view returns (uint8) {
@@ -152,7 +176,6 @@ contract WiseBuddhiClub is
         virtual
         returns (string memory)
     {
-
         if (revealed == false) {
             return hiddenMetadataUri;
         }
@@ -179,7 +202,7 @@ contract WiseBuddhiClub is
         return false;
     }
 
-    function isUserWL(address user) public view returns (bool) {
+    function isUserWhitelist(address user) public view returns (bool) {
         uint256 balance = getWLBalance(user);
 
         if (balance > 0) {
@@ -190,11 +213,11 @@ contract WiseBuddhiClub is
 
     /** Only Owner Functions **/
     function mintOGIdentifier(uint256 amount) public onlyOwner {
-        _mint(msg.sender, WBC_OG, amount, "");
+        _mint(_msgSender(), WBC_OG, amount, "");
     }
 
     function mintWLIdentifier(uint256 amount) public onlyOwner {
-        _mint(msg.sender, WBC_WL, amount, "");
+        _mint(_msgSender(), WBC_WL, amount, "");
     }
 
     function distributeOGIdentifier(address[] calldata recipients)
@@ -204,7 +227,7 @@ contract WiseBuddhiClub is
         uint256 numRecipients = recipients.length;
 
         for (uint256 i = 0; i < numRecipients; i++) {
-            _safeTransferFrom(msg.sender, recipients[i], WBC_OG, 1, "");
+            _safeTransferFrom(_msgSender(), recipients[i], WBC_OG, 1, "");
         }
     }
 
@@ -215,13 +238,13 @@ contract WiseBuddhiClub is
         uint256 numRecipients = recipients.length;
 
         for (uint256 i = 0; i < numRecipients; i++) {
-            safeTransferFrom(msg.sender, recipients[i], WBC_WL, 1, "");
+            safeTransferFrom(_msgSender(), recipients[i], WBC_WL, 1, "");
         }
     }
 
     function airdropNFT(uint256 _mintAmount, address _receiver)
         public
-        mintCompliance(_mintAmount)
+        mintCompliance(_mintAmount, _receiver)
         onlyOwner
     {
         _mintNFT(_receiver, _mintAmount);
@@ -241,9 +264,9 @@ contract WiseBuddhiClub is
     }
 
     function setPaused() public onlyOwner {
-        pause = !pause;
+        paused = !paused;
     }
-    
+
     function setPublicPrice(uint256 price) public onlyOwner {
         publicPrice = price;
     }
@@ -252,12 +275,12 @@ contract WiseBuddhiClub is
         OGPrice = price;
     }
 
-    function setWLPrice(uint256 price) public onlyOwner {
-        WLPrice = price;
+    function setWhitelistPrice(uint256 price) public onlyOwner {
+        WhitelistPrice = price;
     }
 
-    function setWLSupply(uint256 amount) public onlyOwner {
-        WLSupply = amount;
+    function setWhitelistSupply(uint256 amount) public onlyOwner {
+        WhitelistSupply = amount;
     }
 
     function setOGSupply(uint256 amount) public onlyOwner {
@@ -327,7 +350,7 @@ contract WiseBuddhiClub is
         return uriPrefix;
     }
 
-    function startFrom() internal  view virtual  returns (uint256) {
+    function startFrom() internal view virtual returns (uint256) {
         return 1;
     }
 
@@ -336,23 +359,54 @@ contract WiseBuddhiClub is
         uint256[] memory amounts = new uint256[](amount);
 
         for (uint256 i = 0; i < amount; i++) {
-            ids[i] = _totalSupply + i + startFrom();
+            ids[i] = _totalNFTs + startFrom();
             amounts[i] = 1;
-            _totalSupply++;
+            _totalNFTs++;
         }
 
         _mintBatch(to, ids, amounts, "");
     }
 
-    // The following functions are overrides required by Solidity.
-    function _beforeTokenTransfer(
-        address operator,
+    function _getTransferAmount(uint256[] memory ids, uint256[] memory values)
+        internal
+        pure
+        virtual
+        returns (uint256)
+    {
+        uint256 amount = 0;
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            // Exclude selected identifier IDs from total
+            if (ids[i] != WBC_OG && ids[i] != WBC_WL) {
+                amount += values[i];
+            }
+        }
+
+        return amount;
+    }
+
+    function _update(
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        uint256[] memory values
     ) internal override(ERC1155, ERC1155Supply) {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        if (from == address(0)) {
+            uint256 amount = _getTransferAmount(ids, values);
+            totalBalances[to] += amount;
+        } else {
+            uint256 amountTransfered = _getTransferAmount(ids, values);
+
+            totalBalances[from] -= amountTransfered;
+            if (to != address(0)) {
+                totalBalances[to] += amountTransfered;
+            } else {
+                _totalNFTs -= amountTransfered;
+            }
+        }
+
+        super._update(from, to, ids, values);
     }
+
+    receive() external payable {}
 }

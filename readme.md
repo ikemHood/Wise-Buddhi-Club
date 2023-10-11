@@ -83,6 +83,12 @@
 "website": 외부 사이트 링크가 있다면 입력하세요.
 "description": 홈페이지에 표시할 프로젝트 설명을 입력하세요. 따옴표 사이에 텍스트를 작성하거나 붙여넣기 하세요.
 
+이 스마트 계약의 인출 기능이 현재 개발자에게 팁으로 초기 판매의 5%를 보내도록 프로그래밍되어 있음을 참고하시기 바랍니다. 이는 계약 생성 노력에 대한 개발자 지원 방식으로 수행되었습니다.
+
+하지만 이 팁 메커니즘이 편하지 않다면, 저는 완전히 이해합니다. 계약 소유자로서, 당신은 기능에 대한 전적 재량권이 있습니다. 5% 팁을 제거하도록 인출 기능을 수정하고 싶다면 알려주세요. 인출된 자금 100%가 직접 귀하의 계좌로 가도록 코드를 기쁘게 업데이트하겠습니다.
+
+당신의 기본 설정을 알려주시면 필요한 변경 사항을 기쁘게 하겠습니다. 귀하의 목표와 기본 설정에 부합하는 스마트 계약을 만드는 것이 저의 목표입니다. 추가 피드백도 언제든지 주십시오 - 이 계약이 귀하의 요구를 가장 잘 충족하도록 하기 위해 여기 있습니다.
+
 
 # WiseBuddhiClub - En
 
@@ -171,3 +177,10 @@ The website is configured using the info.json file located in the dist folder. T
   - "website": Link to an external site if you have one
 
 - "description": This is where you can put a description of the project that will appear on the home page. Just write or paste text between the quotes. 
+
+
+Please note that the withdraw function in this smart contract is currently programmed to send 5% of the initial sales as a tip to the developer. This was done as a way to support the developer for their efforts in creating the contract.
+
+However, if you are not comfortable with this tip mechanism, I completely understand. As the contract owner, you have full discretion over its functionality. Please let me know if you would like me to modify the withdraw function to remove the 5% tip. I'm happy to update the code so that 100% of the withdrawn funds will go directly to your address.
+
+Just let me know your preference and I'll be glad to make the necessary changes. I aim to create a smart contract that aligns with your goals and preferences. Feel free to provide any other feedback as well - I'm here to ensure this contract best serves your needs.

@@ -21,6 +21,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     string private uriSuffix = ".json";
     string private uriPrefix;
     string private hiddenMetadataUri;
+    string private identifierPrefix;
 
     uint256 public OGPrice = 0.001 ether;
     uint256 public WhitelistPrice = 0.001 ether;
@@ -31,8 +32,8 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     uint256 public OGSupply = 1000;
     uint256 public WhitelistSupply = 5000;
 
-    uint256 private totalOGMinted;
-    uint256 private totalWLMinted;
+    uint256 private totalOGSupplyMinted;
+    uint256 private totalWLSupplyMinted;
 
     uint256 public maxMintAmountPerTx = 3;
     uint256 public maxMintAmountPerAddress = 10;
@@ -45,11 +46,13 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     constructor(
         string memory _tokenName,
         string memory _tokenSymbol,
-        string memory _hiddenMetadataUri
+        string memory _hiddenMetadataUri,
+        string memory _identifierPrefix
     ) ERC1155("") Ownable(_msgSender()) {
         _name = _tokenName;
         _symbol = _tokenSymbol;
         setHiddenMetadataUri(_hiddenMetadataUri);
+        setIdentifierPrefix(_identifierPrefix);
 
         _mint(owner(), WBC_OG, OGSupply, "");
         _mint(owner(), WBC_WL, WhitelistSupply, "");
@@ -80,7 +83,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     }
 
     modifier OGCompliance(uint256 _mintAmount) {
-        require(totalOGMinted + _mintAmount <= OGSupply, "OG supply exceeded!");
+        require(totalOGSupplyMinted + _mintAmount <= OGSupply, "OG supply exceeded!");
         require(round == 1, "The OG Mint has not started!");
         require(msg.value >= OGPrice * _mintAmount, "Insufficient funds!");
         _;
@@ -88,7 +91,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
 
     modifier WLCompliance(uint256 _mintAmount) {
         require(
-            totalWLMinted + _mintAmount <= WhitelistSupply,
+            totalWLSupplyMinted + _mintAmount <= WhitelistSupply,
             "WL supply exceeded!"
         );
         require(round == 2, "The WL Mint has not started!");
@@ -107,7 +110,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
         mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
-        totalWLMinted += _mintAmount;
+        totalWLSupplyMinted += _mintAmount;
 
         _mintNFT(_msgSender(), _mintAmount);
     }
@@ -119,7 +122,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
         mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
-        totalOGMinted += _mintAmount;
+        totalOGSupplyMinted += _mintAmount;
 
         _mintNFT(_msgSender(), _mintAmount);
     }
@@ -176,6 +179,27 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
         virtual
         returns (string memory)
     {
+        
+        if(_tokenId == WBC_OG){
+            return string(
+                    abi.encodePacked(
+                        identifierPrefix,
+                        "og",
+                        uriSuffix
+                    )
+                );
+        }
+        
+        if(_tokenId == WBC_WL){
+            return string(
+                    abi.encodePacked(
+                        identifierPrefix,
+                        "whitelist",
+                        uriSuffix
+                    )
+                );
+        }
+
         if (revealed == false) {
             return hiddenMetadataUri;
         }
@@ -191,6 +215,10 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
                     )
                 )
                 : "";
+    }
+
+    function uri(uint256 _tokenId) public view virtual override returns (string memory) {
+        return tokenURI(_tokenId);
     }
 
     function isUserOG(address user) public view returns (bool) {
@@ -306,6 +334,13 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
         onlyOwner
     {
         hiddenMetadataUri = _hiddenMetadataUri;
+    }
+
+    function setIdentifierPrefix(string memory _identifierPrefix)
+        public
+        onlyOwner
+    {
+        identifierPrefix = _identifierPrefix;
     }
 
     function setURI(string memory newuri) public onlyOwner {

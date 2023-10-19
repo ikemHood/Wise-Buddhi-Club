@@ -164,7 +164,7 @@ The website is configured using the info.json file located in the dist folder. T
 
 - "contract_address": This is where you'll put the address of the deployed NFT smart contract. Don't change the "contract_address" part, just paste the address inside the quotes.
 
-- "chainId": This specifies the blockchain network. 1 is for Ethereum mainnet. 
+- "chainId": This specifies the blockchain network. 1 is for Ethereum mainnet.  /**supports ethereum= 1, georli=5 and sepolia=11155111 only **/
 
 - "links": This contains links you want to display on the site. Just paste in the URL between the quotes for each property.
 

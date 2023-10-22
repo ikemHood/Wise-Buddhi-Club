@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -74,18 +74,9 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
      */
     modifier mintCompliance(uint256 _mintAmount, address user) {
         require(!paused || _msgSender() == owner(), "Contract Is Paused");
-        require(
-            _mintAmount > 0 && _mintAmount <= maxMintAmountPerTx,
-            "Invalid mint amount!"
-        );
-        require(
-            mintedAmount[user] + _mintAmount <= maxMintAmountPerAddress,
-            "Exceeds max mint amount"
-        );
-        require(
-            totalSupply() + _mintAmount <= maxSupply,
-            "Max supply exceeded!"
-        );
+        require( _mintAmount > 0 && _mintAmount <= maxMintAmountPerTx, "Invalid mint amount!");
+        require( mintedAmount[user] + _mintAmount <= maxMintAmountPerAddress, "Exceeds max mint amount");
+        require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded!"  );
         _;
     }
 
@@ -103,11 +94,9 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
      * @dev Ensures compliance for OG minting.
      * @param _mintAmount Amount to mint.
      */
-    modifier OGCompliance(uint256 _mintAmount) {
-        require(
-            totalOGSupplyMinted + _mintAmount <= OGSupply,
-            "OG supply exceeded!"
-        );
+    modifier OGCompliance(uint256 _mintAmount, address user) {
+        require( totalOGSupplyMinted + _mintAmount <= OGSupply, "OG supply exceeded!");
+        require(isUserOG(user), "Not OG");
         require(round == 1, "The OG Mint has not started!");
         require(msg.value >= OGPrice * _mintAmount, "Insufficient funds!");
         _;
@@ -117,16 +106,11 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
      * @dev Ensures compliance for whitelist minting.
      * @param _mintAmount Amount to mint.
      */
-    modifier WLCompliance(uint256 _mintAmount) {
-        require(
-            totalWLSupplyMinted + _mintAmount <= WhitelistSupply,
-            "WL supply exceeded!"
-        );
+    modifier WLCompliance(uint256 _mintAmount, address user) {
+        require( totalWLSupplyMinted + _mintAmount <= WhitelistSupply, "WL supply exceeded!");
+        require(isUserWhitelist(user) || isUserOG(user), "Not Whitelist or OG");
         require(round == 2, "The WL Mint has not started!");
-        require(
-            msg.value >= WhitelistPrice * _mintAmount,
-            "Insufficient funds!"
-        );
+        require( msg.value >= WhitelistPrice * _mintAmount,"Insufficient funds!");
         _;
     }
 
@@ -141,7 +125,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     )
         public
         payable
-        WLCompliance(_mintAmount)
+        WLCompliance(_mintAmount, _msgSender())
         mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
@@ -159,7 +143,7 @@ contract WiseBuddhiClub is ERC1155, Ownable, ERC1155Supply, ReentrancyGuard {
     )
         public
         payable
-        OGCompliance(_mintAmount)
+        OGCompliance(_mintAmount, _msgSender())
         mintCompliance(_mintAmount, _msgSender())
     {
         mintedAmount[_msgSender()] += _mintAmount;
